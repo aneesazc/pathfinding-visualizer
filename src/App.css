@@ -1,0 +1,56 @@
+body {
+  background-color: burlywood;
+}
+
+.maze-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.maze {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.maze-btn {
+  background-color: #0091ff;
+  margin: 0.625rem;
+  cursor: pointer;
+  color: whitesmoke;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  padding: 0.625rem 1.25rem;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  background-color: whitesmoke;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid whitesmoke;
+}
+
+.cell.wall {
+  background-color: black;
+}
+
+.cell.path {
+  background-color: whitesmoke;
+}
+
+.cell.start {
+  background-color: green;
+}
+
+.cell.end {
+  background-color: red;
+}
