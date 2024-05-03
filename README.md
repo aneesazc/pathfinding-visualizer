@@ -1,6 +1,6 @@
 ## Pathfinding Visualizer
 
-Check out the live version: [visualizer](pathfinding-visualizer-5kvm0hu0u-aneesazcs-projects.vercel.app) 
+Check out the live version: [Pathfinder](https://pathfinding-visualizer-six-sandy.vercel.app/)
 
 ### Getting Started Locally
 - Clone the repo
