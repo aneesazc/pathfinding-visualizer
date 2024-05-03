@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
 
 export default function App() {
   let initialMaze = [
@@ -11,29 +11,164 @@ export default function App() {
     ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
     ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
     ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "end"],
-    ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
-  ]
-  
-  const [maze, setMaze] = useState(initialMaze)
+    ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
+  ];
 
-  function generateMaze(h, w){
-    const matrix = []
+  const [w, setW] = useState();
+  const [h, setH] = useState();
+  const [timeoutIds, setTimeoutIds] = useState([]);
 
-    for (let i = 0; i < h; i++){
-      let row = []
-      for (let j = 0; j < w; j++){
-        let cell = Math.random()
-        row.push("wall");
+  function bfs(startNode) {
+    let q = [startNode];
+    let visited = new Set(`${startNode[0]},${startNode[1]}`);
+
+    function visitCell([x, y]) {
+      setMaze((prevMaze) =>
+        prevMaze.map((row, rowIndex) =>
+          row.map((cell, cellIndex) => {
+            if (rowIndex === y && cellIndex === x) {
+              return cell === "end" ? "end" : "visited";
+            }
+            return cell;
+          }),
+        ),
+      );
+
+      if (maze[y][x] === "end") {
+        console.log("path found!");
+        return true;
       }
-      matrix.push(row)
+      return false;
     }
 
-    const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]]
+    function step() {
+      if (q.length === 0) {
+        return;
+      }
+
+      const [x, y] = q.shift();
+      const dirs = [
+        [0, 1],
+        [1, 0],
+        [0, -1],
+        [-1, 0],
+      ];
+
+      for (let [dx, dy] of dirs) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (
+          nx >= 0 &&
+          nx < w &&
+          ny >= 0 &&
+          ny < h &&
+          !visited.has(`${nx},${ny}`)
+        ) {
+          visited.add(`${nx},${ny}`);
+          if (maze[ny][nx] === "path" || maze[ny][nx] === "end") {
+            if (visitCell([nx, ny])) {
+              return true;
+            }
+            q.push([nx, ny]);
+          }
+        }
+      }
+      const timeoutId = setTimeout(step, 100);
+      setTimeoutIds((previousTimeoutIds) => [...previousTimeoutIds, timeoutId]);
+    }
+
+    step();
+    return false;
+    // return True/False
+  }
+
+  function dfs(startNode) {
+    let stack = [startNode];
+    let visited = new Set(`${startNode[0]},${startNode[1]}`);
+
+    function visitCell([x, y]) {
+      console.log(x, y);
+
+      setMaze((prevMaze) =>
+        prevMaze.map((row, rowIndex) =>
+          row.map((cell, cellIndex) => {
+            if (rowIndex === y && cellIndex === x) {
+              return cell === "end" ? "end" : "visited";
+            }
+            return cell;
+          }),
+        ),
+      );
+      if (maze[y][x] === "end") {
+        console.log("path found!");
+        return true;
+      }
+      return false;
+    }
+
+    function step() {
+      if (stack.length === 0) {
+        return;
+      }
+      const [x, y] = stack.pop();
+      console.log("new step");
+      const dirs = [
+        [0, 1],
+        [1, 0],
+        [0, -1],
+        [-1, 0],
+      ];
+
+      for (const [dx, dy] of dirs) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (
+          nx >= 0 &&
+          nx < w &&
+          ny >= 0 &&
+          ny < h &&
+          !visited.has(`${nx},${ny}`)
+        ) {
+          visited.add(`${nx},${ny}`);
+          if (maze[ny][nx] === "path" || maze[ny][nx] === "end") {
+            if (visitCell([nx, ny])) {
+              return true;
+            }
+            stack.push([nx, ny]);
+          }
+        } // '2, 3'
+      }
+      const timeoutId = setTimeout(step, 100);
+      setTimeoutIds((previousTimeoutIds) => [...previousTimeoutIds, timeoutId]);
+    }
+
+    step();
+    return false;
+  }
+
+  const [maze, setMaze] = useState(initialMaze);
+
+  function generateMaze(h, w) {
+    const matrix = [];
+
+    for (let i = 0; i < h; i++) {
+      let row = [];
+      for (let j = 0; j < w; j++) {
+        let cell = Math.random();
+        row.push("wall");
+      }
+      matrix.push(row);
+    }
+
+    const dirs = [
+      [0, 1],
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+    ];
 
     function isCellValid(x, y) {
-      return (
-        y >= 0 && x >= 0 && x < w && y < h && matrix[y][x] === "wall"
-      );
+      return y >= 0 && x >= 0 && x < w && y < h && matrix[y][x] === "wall";
     }
 
     function carvePath(x, y) {
@@ -55,26 +190,46 @@ export default function App() {
 
     matrix[1][0] = "start";
     matrix[h - 2][w - 1] = "end";
+    setH(matrix.length);
+    setW(matrix[0].length);
     setMaze(matrix);
   }
+
+  function refreshMaze() {
+    timeoutIds.forEach(clearTimeout);
+    setTimeoutIds([]);
+    generateMaze(14, 20);
+  }
+
+  useEffect(() => {
+    generateMaze(14, 20);
+  }, []);
+
   return (
-    <div className='maze-grid'>
-      <button 
-        onClick={() => generateMaze(10, 10)}
-        className='maze-btn'>
-        Refresh Maze
-      </button>
-      <div className='maze'>
+    <div className="maze-grid">
+      <div className="btns">
+        <button onClick={refreshMaze} className="maze-btn">
+          Refresh Maze
+        </button>
+        <button onClick={() => bfs([1, 0])} className="maze-btn">
+          Start BFS
+        </button>
+        <button onClick={() => dfs([1, 0])} className="maze-btn">
+          Start DFS
+        </button>
+      </div>
+      <div className="maze">
         {maze.map((row, rowIdx) => (
           <div className="row" key={`${rowIdx}`}>
             {row.map((cell, cellIdx) => (
-              <div className={`cell ${cell}`} 
-                key={`${rowIdx}-${cellIdx}`}>
-              </div>
+              <div
+                className={`cell ${cell}`}
+                key={`${rowIdx}-${cellIdx}`}
+              ></div>
             ))}
-          </div>  
+          </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
